@@ -4,101 +4,96 @@ using AuthService.Persistence.Data; // CORREGIDO: Era AppDbContext
 
 namespace AuthService.Api.Controllers
 {
-    /// <summary>
-    /// Controlador para verificar la salud del sistema
-    /// </summary>
-    [ApiController]
-    [Route("api/health")]
-    public class HealthController : ControllerBase
+    
+/// <summary>
+/// Controlador para verificar la salud del sistema
+/// </summary>
+[ApiController]
+[Route("api/health")]
+public class HealthController : ControllerBase
+{
+    private readonly ApplicationDbContext _dbContext;
+    private readonly ILogger<HealthController> _logger;
+
+    public HealthController(
+        ApplicationDbContext dbContext,
+        ILogger<HealthController> logger)
     {
-        private readonly ApplicationDbContext _dbContext; // CORREGIDO
-        private readonly ILogger<HealthController> _logger;
+        _dbContext = dbContext;
+        _logger = logger;
+    }
 
-        public HealthController(
-            ApplicationDbContext dbContext, // CORREGIDO
-            ILogger<HealthController> logger)
+    /// <summary>
+    /// Verifica el estado de la API y la base de datos
+    /// </summary>
+    /// <returns>Estado del sistema</returns>
+    /// <response code="200">Sistema saludable</response>
+    /// <response code="503">Sistema no disponible</response>
+    [HttpGet]
+    public async Task<IActionResult> Check()
+    {
+        var healthStatus = new
         {
-            _dbContext = dbContext;
-            _logger = logger;
-        }
+            api = "Healthy",
+            database = "Unknown",
+            timestamp = DateTime.UtcNow
+        };
 
-        /// <summary>
-        /// Verifica la salud del sistema
-        /// GET /api/health
-        /// </summary>
-        [HttpGet]
-        public async Task<IActionResult> Check()
+        try
         {
-            var healthStatus = new
+            var startTime = DateTime.UtcNow;
+            var canConnect = await _dbContext.Database.CanConnectAsync();
+            var responseTime = (DateTime.UtcNow - startTime).TotalMilliseconds;
+
+            if (canConnect)
             {
-                api = "Healthy",
-                database = "Unknown",
-                timestamp = DateTime.UtcNow
-            };
+                var rolesCount = await _dbContext.Role.CountAsync();
 
-            try
-            {
-                // Verificar conexión a base de datos
-                var startTime = DateTime.UtcNow;
-                var canConnect = await _dbContext.Database.CanConnectAsync();
-                var responseTime = (DateTime.UtcNow - startTime).TotalMilliseconds;
-
-                if (canConnect)
+                healthStatus = healthStatus with
                 {
-                    var rolesCount = await _dbContext.Role.CountAsync();
-                    
-                    healthStatus = healthStatus with 
-                    { 
-                        database = $"Healthy ({responseTime:F0}ms, {rolesCount} roles)" 
-                    };
-                }
-                else
-                {
-                    healthStatus = healthStatus with { database = "Unhealthy" };
-                }
-
-                var overallHealthy = healthStatus.database.StartsWith("Healthy");
-
-                return Ok(new
-                {
-                    success = true,
-                    status = overallHealthy ? "Healthy" : "Unhealthy",
-                    checks = healthStatus,
-                    timestamp = DateTime.UtcNow
-                });
+                    database = $"Healthy ({responseTime:F0}ms, {rolesCount} roles)"
+                };
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Error al verificar la salud del sistema");
-
-                return StatusCode(503, new
-                {
-                    success = false,
-                    status = "Unhealthy",
-                    checks = new
-                    {
-                        api = "Healthy",
-                        database = "Unhealthy",
-                        error = ex.Message
-                    },
-                    timestamp = DateTime.UtcNow
-                });
+                healthStatus = healthStatus with { database = "Unhealthy" };
             }
-        }
 
-        /// <summary>
-        /// Ping simple
-        /// GET /api/health/ping
-        /// </summary>
-        [HttpGet("ping")]
-        public IActionResult Ping()
-        {
             return Ok(new
             {
                 success = true,
-                status = "alive",
+                status = "Healthy",
+                checks = healthStatus,
                 timestamp = DateTime.UtcNow
             });
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error en health check");
+
+            return StatusCode(503, new
+            {
+                success = false,
+                status = "Unhealthy",
+                error = ex.Message
+            });
+        }
     }
+
+    /// <summary>
+    /// Endpoint de prueba (ping)
+    /// </summary>
+    /// <returns>Respuesta simple</returns>
+    /// <response code="200">Servicio activo</response>
+    [HttpGet("ping")]
+    public IActionResult Ping()
+    {
+        return Ok(new
+        {
+            success = true,
+            status = "alive",
+            timestamp = DateTime.UtcNow
+        });
+    }
+}
 }
