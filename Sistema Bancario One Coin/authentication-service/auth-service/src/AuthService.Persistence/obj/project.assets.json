@@ -2794,19 +2794,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Angelo Garcia\\.nuget\\packages\\": {}
+    "C:\\Users\\GMG\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Angelo Garcia\\Desktop\\git\\Los-Rezagados-Sistema-Bancario-One-Coin\\authentication-service\\auth-service\\src\\AuthService.Persistence\\AuthService.Persistence.csproj",
+      "projectUniqueName": "C:\\Users\\GMG\\Documents\\DocOneCoin\\BitCoiners-Sistema-Bancario-One-Coin\\Sistema Bancario One Coin\\authentication-service\\auth-service\\src\\AuthService.Persistence\\AuthService.Persistence.csproj",
       "projectName": "AuthService.Persistence",
-      "projectPath": "C:\\Users\\Angelo Garcia\\Desktop\\git\\Los-Rezagados-Sistema-Bancario-One-Coin\\authentication-service\\auth-service\\src\\AuthService.Persistence\\AuthService.Persistence.csproj",
-      "packagesPath": "C:\\Users\\Angelo Garcia\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Angelo Garcia\\Desktop\\git\\Los-Rezagados-Sistema-Bancario-One-Coin\\authentication-service\\auth-service\\src\\AuthService.Persistence\\obj\\",
+      "projectPath": "C:\\Users\\GMG\\Documents\\DocOneCoin\\BitCoiners-Sistema-Bancario-One-Coin\\Sistema Bancario One Coin\\authentication-service\\auth-service\\src\\AuthService.Persistence\\AuthService.Persistence.csproj",
+      "packagesPath": "C:\\Users\\GMG\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\GMG\\Documents\\DocOneCoin\\BitCoiners-Sistema-Bancario-One-Coin\\Sistema Bancario One Coin\\authentication-service\\auth-service\\src\\AuthService.Persistence\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Angelo Garcia\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\GMG\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -2818,8 +2818,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\Angelo Garcia\\Desktop\\git\\Los-Rezagados-Sistema-Bancario-One-Coin\\authentication-service\\auth-service\\src\\AuthService.Domain\\AuthService.Domain.csproj": {
-              "projectPath": "C:\\Users\\Angelo Garcia\\Desktop\\git\\Los-Rezagados-Sistema-Bancario-One-Coin\\authentication-service\\auth-service\\src\\AuthService.Domain\\AuthService.Domain.csproj"
+            "C:\\Users\\GMG\\Documents\\DocOneCoin\\BitCoiners-Sistema-Bancario-One-Coin\\Sistema Bancario One Coin\\authentication-service\\auth-service\\src\\AuthService.Domain\\AuthService.Domain.csproj": {
+              "projectPath": "C:\\Users\\GMG\\Documents\\DocOneCoin\\BitCoiners-Sistema-Bancario-One-Coin\\Sistema Bancario One Coin\\authentication-service\\auth-service\\src\\AuthService.Domain\\AuthService.Domain.csproj"
             }
           }
         }
@@ -2872,7 +2872,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.418/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.419/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

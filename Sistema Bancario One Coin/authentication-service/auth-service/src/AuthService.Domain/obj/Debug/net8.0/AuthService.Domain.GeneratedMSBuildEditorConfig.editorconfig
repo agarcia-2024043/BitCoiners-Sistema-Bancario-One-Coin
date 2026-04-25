@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = AuthService.Domain
-build_property.ProjectDir = C:\Users\Angelo Garcia\Desktop\git\Los-Rezagados-Sistema-Bancario-One-Coin\authentication-service\auth-service\src\AuthService.Domain\
+build_property.ProjectDir = C:\Users\GMG\Documents\DocOneCoin\BitCoiners-Sistema-Bancario-One-Coin\Sistema Bancario One Coin\authentication-service\auth-service\src\AuthService.Domain\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
