@@ -10,7 +10,7 @@ const options = {
             description: "API REST del sistema bancario. Gestión de cuentas, transacciones, divisas, favoritos y límites. La autenticación es manejada por el servicio .NET.",
             contact: {
                 name: "Equipo BitCoiners",
-                email: "soporte@bancosistema.com"
+                email: "BitCoiner@gmail.com"
             }
         },
         servers: [
@@ -43,17 +43,17 @@ const options = {
                     type: "object",
                     required: ["username", "email", "password"],
                     properties: {
-                        username: { type: "string", example: "jperez" },
-                        email:    { type: "string", example: "jperez@banco.com" },
-                        password: { type: "string", example: "MiClave123" }
+                        username: { type: "string", example: "agarcia" },
+                        email:    { type: "string", example: "agarcia@banco.com" },
+                        password: { type: "string", example: "puvlover123" }
                     }
                 },
                 LoginRequest: {
                     type: "object",
                     required: ["email", "password"],
                     properties: {
-                        email:    { type: "string", example: "jperez@banco.com" },
-                        password: { type: "string", example: "MiClave123" }
+                        email:    { type: "string", example: "agarcia@banco.com" },
+                        password: { type: "string", example: "puvlover123" }
                     }
                 },
                 AuthResponse: {
@@ -96,19 +96,19 @@ const options = {
                     type: "object",
                     required: ["fromAccount", "toAccount", "amount"],
                     properties: {
-                        fromAccount: { type: "string", example: "64f123abc456" },
-                        toAccount:   { type: "string", example: "64f789xyz123" },
-                        amount:      { type: "number", example: 100.00 }
+                        fromAccount: { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0d" },
+                        toAccount:   { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0e" },
+                        amount:      { type: "number", example: 500.00 }
                     }
                 },
                 Transaction: {
                     type: "object",
                     properties: {
                         _id:         { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0f" },
-                        fromAccount: { type: "string", example: "64f123abc456" },
-                        toAccount:   { type: "string", example: "64f789xyz123" },
-                        amount:      { type: "number", example: 100.00 },
-                        type:        { type: "string", enum: ["transfer", "deposit", "withdraw"], example: "transfer" },
+                        fromAccount: { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0d" },
+                        toAccount:   { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0e" },
+                        amount:      { type: "number", example: 500.00 },
+                        type:        { type: "string", enum: ["transfer", "deposit", "withdrawal"], example: "transfer" },
                         status:      { type: "string", enum: ["completed", "reversed"], example: "completed" },
                         createdAt:   { type: "string", format: "date-time", example: "2025-01-15T10:30:00Z" }
                     }
@@ -165,45 +165,6 @@ const options = {
                     type: "object",
                     required: ["accountId", "dailyLimit", "monthlyLimit"],
                     properties: {
-                        accountId:    { type: "string", example: "64f123abc456" },
-                        dailyLimit:   { type: "number", example: 5000 },
-                        monthlyLimit: { type: "number", example: 20000 }
-                    }
-                },
-                Limit: {
-                    type: "object",
-                    properties: {
-                        _id:          { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0g" },
-                        accountId:    { type: "string", example: "64f123abc456" },
-                        dailyLimit:   { type: "number", example: 5000 },
-                        monthlyLimit: { type: "number", example: 20000 }
-                    }
-                },
-                // ── Users ────────────────────────────────────────────────
-                CreateUserRequest: {
-                    type: "object",
-                    required: ["name", "email", "password", "role"],
-                    properties: {
-                        name:     { type: "string", example: "Juan Perez" },
-                        email:    { type: "string", example: "juan@test.com" },
-                        password: { type: "string", example: "123456" },
-                        role:     { type: "string", enum: ["Admin", "Cliente", "Cajero", "Auditor"], example: "Cliente" }
-                    }
-                },
-                User: {
-                    type: "object",
-                    properties: {
-                        _id:   { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0a" },
-                        name:  { type: "string", example: "Juan Perez" },
-                        email: { type: "string", example: "juan@test.com" },
-                        role:  { type: "string", example: "Cliente" }
-                    }
-                },
-                // ── Limits ───────────────────────────────────────────────
-                LimitRequest: {
-                    type: "object",
-                    required: ["accountId", "dailyLimit", "monthlyLimit"],
-                    properties: {
                         accountId:    { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0d" },
                         dailyLimit:   { type: "number", example: 5000 },
                         monthlyLimit: { type: "number", example: 20000 }
@@ -225,36 +186,14 @@ const options = {
                         monthlyLimit: { type: "number", example: 20000 }
                     }
                 },
-                // ── Transactions ─────────────────────────────────────────
-                TransferRequest: {
-                    type: "object",
-                    required: ["fromAccount", "toAccount", "amount"],
-                    properties: {
-                        fromAccount: { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0d" },
-                        toAccount:   { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0e" },
-                        amount:      { type: "number", example: 500.00 }
-                    }
-                },
-                Transaction: {
-                    type: "object",
-                    properties: {
-                        _id:         { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0f" },
-                        fromAccount: { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0d" },
-                        toAccount:   { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0e" },
-                        amount:      { type: "number", example: 500.00 },
-                        type:        { type: "string", enum: ["transfer", "deposit", "withdrawal"], example: "transfer" },
-                        status:      { type: "string", enum: ["completed", "reversed"], example: "completed" },
-                        createdAt:   { type: "string", format: "date-time", example: "2025-01-15T10:30:00Z" }
-                    }
-                },
                 // ── Users ─────────────────────────────────────────────────
                 CreateUserRequest: {
                     type: "object",
                     required: ["name", "email", "password", "role"],
                     properties: {
-                        name:     { type: "string", example: "Juan Perez" },
-                        email:    { type: "string", example: "juan@banco.com" },
-                        password: { type: "string", example: "MiClave123" },
+                        name:     { type: "string", example: "Angel Garcia" },
+                        email:    { type: "string", example: "agarcia@banco.com" },
+                        password: { type: "string", example: "puvlover123" },
                         role:     { type: "string", enum: ["Admin", "Cliente", "Cajero", "Auditor"], example: "Cliente" }
                     }
                 },
@@ -262,8 +201,8 @@ const options = {
                     type: "object",
                     properties: {
                         _id:   { type: "string", example: "664f1a2b3c4d5e6f7a8b9c0a" },
-                        name:  { type: "string", example: "Juan Perez" },
-                        email: { type: "string", example: "juan@banco.com" },
+                        name:  { type: "string", example: "Angel Garcia" },
+                        email: { type: "string", example: "agarcia@banco.com" },
                         role:  { type: "string", example: "Cliente" }
                     }
                 },
@@ -286,7 +225,7 @@ const options = {
         },
         security: [{ bearerAuth: [] }]
     },
-    apis: ["./Routes/*.js", "./routes/*.js"]
+    apis: ["./src/Routes/*.js"]
 };
 
 const swaggerSpec = swaggerJsdoc(options);
@@ -304,5 +243,5 @@ export const setupSwagger = (app) => {
         res.send(swaggerSpec);
     });
 
-    console.log("📚 Swagger disponible en: http://localhost:3000/api-docs");
+    console.log(" Swagger disponible en: http://localhost:3000/api-docs");
 };
