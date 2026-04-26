@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "xWZCQEVLkBg=",
+  "dgSpecHash": "K/E0agH61Dc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\GMG\\Documents\\DocOneCoin\\BitCoiners-Sistema-Bancario-One-Coin\\Sistema Bancario One Coin\\authentication-service\\auth-service\\src\\AuthService.Domain\\AuthService.Domain.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\Angelo Garcia\\Desktop\\git\\BitCoiners-Sistema-Bancario-One-Coin\\Sistema Bancario One Coin\\authentication-service\\auth-service\\src\\AuthService.Domain\\AuthService.Domain.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Angelo Garcia\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.23\\microsoft.netcore.app.ref.8.0.23.nupkg.sha512",
+    "C:\\Users\\Angelo Garcia\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.23\\microsoft.windowsdesktop.app.ref.8.0.23.nupkg.sha512",
+    "C:\\Users\\Angelo Garcia\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.23\\microsoft.aspnetcore.app.ref.8.0.23.nupkg.sha512"
+  ],
   "logs": []
 }
