@@ -1,6 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+// Línea 1 — junto a los imports de arriba
+import { setupSwagger } from "./Config/documentation.js";
 import { connectDB } from "./Config/database.js";
 
 import accountRoutes from "./Routes/account.routes.js";
@@ -19,6 +21,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 connectDB();
+setupSwagger(app);
 
 app.get("/", (req, res) => {
     res.json({ 
