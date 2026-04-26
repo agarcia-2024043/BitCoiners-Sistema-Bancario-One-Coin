@@ -123,8 +123,19 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Sistema Bancario API",
         Version = "v1",
-        Description = "API REST para sistema bancario seguro"
+        Description = "API REST para sistema bancario seguro con autenticación JWT y roles.",
+        Contact = new OpenApiContact
+        {
+            Name = "Equipo BitCoiners",
+            Email = "soporte@bancosistema.com"
+        }
     });
+
+    // ✅ ESTO es lo que activa los /// <summary> en Swagger UI
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+        c.IncludeXmlComments(xmlPath);
 
     // Configurar JWT en Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
