@@ -1,4 +1,4 @@
-# Sistema Bancario - Los Rezagados
+# Sistema Bancario - One Coin
 
 > **Nota del Proyecto**
 > Este sistema fue desarrollado con fines didácticos para el curso de **Taller de IN6AM**. Implementa una arquitectura moderna de microservicios, priorizando la seguridad financiera, la escalabilidad y las mejores prácticas en el manejo de datos bancarios.
@@ -252,5 +252,5 @@ Los-Rezagados-Sistema-Bancario
 
 ## Autores
 
-**Equipo:** Los Rezagados
+**Equipo:** BitCoiners
 **Curso:** Taller de IN6AM — Jornada Matutina
