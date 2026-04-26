@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AuthService.Api</name>
+    </assembly>
+    <members>
+        <member name="T:AuthService.Api.Controllers.AdminController">
+            <summary>
+            Controlador de administración y gestión de usuarios bancarios.
+            Permite consultar información del usuario autenticado y acceder a rutas protegidas por rol.
+            </summary>
+        </member>
+        <member name="M:AuthService.Api.Controllers.AdminController.Me">
+             <summary>
+             Obtiene la información del usuario autenticado.
+             </summary>
+             <remarks>
+             Retorna los datos del token JWT del usuario que realiza la solicitud.
+             Requiere un token JWT válido en el header Authorization.
+            
+             Ejemplo de respuesta:
+             <code>
+             {
+               "success": true,
+               "sub": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+               "username": "jperez",
+               "role": "cajero"
+             }
+             </code>
+             </remarks>
+             <response code="200">Información del usuario autenticado retornada correctamente.</response>
+             <response code="401">Token JWT inválido, expirado o no proporcionado.</response>
+        </member>
+        <member name="M:AuthService.Api.Controllers.AdminController.OnlyAdmin">
+             <summary>
+             Endpoint exclusivo para administradores bancarios.
+             </summary>
+             <remarks>
+             Solo accesible por usuarios con el rol <b>adminBanco</b>.
+             Verifica que el token JWT contenga el claim de rol correspondiente.
+            
+             Ejemplo de respuesta exitosa:
+             <code>
+             {
+               "success": true,
+               "message": "Acceso permitido: administrador bancario"
+             }
+             </code>
+             </remarks>
+             <response code="200">Acceso concedido al administrador bancario.</response>
+             <response code="401">Token JWT no proporcionado o inválido.</response>
+             <response code="403">El usuario no tiene el rol de administrador bancario.</response>
+        </member>
+        <member name="T:AuthService.Api.Controllers.MeResponse">
+            <summary>Respuesta del endpoint /me con datos del usuario autenticado.</summary>
+        </member>
+        <member name="M:AuthService.Api.Controllers.MeResponse.#ctor(System.Boolean,System.String,System.String,System.String)">
+            <summary>Respuesta del endpoint /me con datos del usuario autenticado.</summary>
+        </member>
+        <member name="T:AuthService.Api.Controllers.AdminResponse">
+            <summary>Respuesta del endpoint de acceso exclusivo para administradores.</summary>
+        </member>
+        <member name="M:AuthService.Api.Controllers.AdminResponse.#ctor(System.Boolean,System.String)">
+            <summary>Respuesta del endpoint de acceso exclusivo para administradores.</summary>
+        </member>
+        <member name="T:AuthService.Api.Controllers.ErrorResponse">
+            <summary>Modelo de respuesta para errores de autenticación y autorización.</summary>
+        </member>
+        <member name="M:AuthService.Api.Controllers.ErrorResponse.#ctor(System.Boolean,System.String)">
+            <summary>Modelo de respuesta para errores de autenticación y autorización.</summary>
+        </member>
+        <member name="T:AuthService.Api.Controllers.AuthController">
+            <summary>
+            Controlador de autenticación del sistema bancario
+            Permite registrar usuarios, iniciar sesión y obtener información del usuario autenticado
+            </summary>
+        </member>
+        <member name="M:AuthService.Api.Controllers.AuthController.Login(AuthService.Application.DTOs.LoginDto)">
+            <summary>
+            Iniciar sesión en el sistema
+            </summary>
+            <param name="dto">Credenciales del usuario</param>
+            <returns>Token JWT si las credenciales son válidas</returns>
+            <response code="200">Login exitoso</response>
+            <response code="401">Credenciales inválidas</response>
+        </member>
+        <member name="M:AuthService.Api.Controllers.AuthController.Register(AuthService.Application.DTOs.RegisterDto)">
+            <summary>
+            Registrar un nuevo usuario
+            </summary>
+            <param name="dto">Datos del usuario</param>
+            <returns>Usuario registrado</returns>
+            <response code="200">Registro exitoso</response>
+            <response code="400">Error en los datos</response>
+        </member>
+        <member name="M:AuthService.Api.Controllers.AuthController.GetMe">
+            <summary>
+            Obtener información del usuario autenticado
+            </summary>
+            <returns>Datos del usuario actual</returns>
+            <response code="200">Usuario autenticado</response>
+            <response code="401">Token inválido</response>
+        </member>
+        <member name="T:AuthService.Api.Controllers.HealthController">
+            <summary>
+            Controlador para verificar la salud del sistema
+            </summary>
+        </member>
+        <member name="M:AuthService.Api.Controllers.HealthController.Check">
+            <summary>
+            Verifica el estado de la API y la base de datos
+            </summary>
+            <returns>Estado del sistema</returns>
+            <response code="200">Sistema saludable</response>
+            <response code="503">Sistema no disponible</response>
+        </member>
+        <member name="M:AuthService.Api.Controllers.HealthController.Ping">
+            <summary>
+            Endpoint de prueba (ping)
+            </summary>
+            <returns>Respuesta simple</returns>
+            <response code="200">Servicio activo</response>
+        </member>
+        <member name="T:AuthService.Application.Exceptions.UserNotFoundException">
+            <summary>
+            Excepción cuando un usuario no es encontrado
+            </summary>
+        </member>
+        <member name="T:AuthService.Application.Exceptions.InvalidCredentialsException">
+            <summary>
+            Excepción cuando las credenciales son inválidas
+            </summary>
+        </member>
+        <member name="T:AuthService.Application.Exceptions.InsufficientFundsException">
+            <summary>
+            Excepción cuando no hay fondos suficientes
+            </summary>
+        </member>
+        <member name="T:AuthService.Application.Exceptions.AccountBlockedException">
+            <summary>
+            Excepción cuando una cuenta está bloqueada
+            </summary>
+        </member>
+        <member name="T:AuthService.Application.Exceptions.EmailNotVerifiedException">
+            <summary>
+            Excepción cuando el email no está verificado
+            </summary>
+        </member>
+    </members>
+</doc>
