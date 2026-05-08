@@ -1,0 +1,42 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #0f2a44;
+  --color-secondary: #1e4f7a;
+  --color-accent: #00bcd4;    
+  --color-accent-2: #ffc107;   
+  --color-bg-dark: #0a1929;    
+  --color-surface: rgba(255, 255, 255, 0.08); 
+  --color-border: rgba(255, 255, 255, 0.15);
+  --color-text: #ffffff;
+  --color-muted: #b0bec5;
+  --color-error: #ff4d4f;
+}
+
+:root {
+  --primary: #0f2a44;
+  --secondary: #1e4f7a;
+  --accent: #00bcd4;
+  --accent-2: #ffc107;
+  --bg-dark: #0a1929;
+  --surface: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.15);
+  --text: #ffffff;
+  --muted: #b0bec5;
+  --error: #ff4d4f;
+}
+
+.glass {
+  backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glow {
+  box-shadow: 0 0 25px rgba(0, 188, 212, 0.25);
+}
+
+.input-focus:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.2);
+}
