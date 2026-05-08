@@ -44,8 +44,11 @@ public class AuthService : IAuthService
         return new AuthResponseDto
         {
             Success = true,
+            Message = "Login exitoso",
+
             Token = _jwt.GenerateToken(user),
             RefreshToken = _jwt.GenerateRefreshToken(),
+
             User = new UserDetailsDto
             {
                 Id = user.Id.ToString(),
@@ -63,8 +66,6 @@ public class AuthService : IAuthService
         if (await _users.ExistsAsync(dto.Email))
             return new AuthResponseDto { Success = false, Message = "El email ya está registrado" };
 
-        // Buscar el rol "Cliente" en la base de datos
-        // Los roles fueron sembrados en ApplicationDbContext con HasData()
         var clienteRole = await _users.GetRoleByNameAsync("Cliente");
 
         if (clienteRole == null)
@@ -73,26 +74,45 @@ public class AuthService : IAuthService
         var newUser = new User
         {
             Email = dto.Email,
-            Username = dto.Email, // usar email como username por defecto
+            Username = dto.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, 12),
-            EmailConfirmed = false,
+            EmailConfirmed = true,
             VerificationToken = Guid.NewGuid().ToString(),
             UserRoles = new List<UserRole>
             {
-                // Asignamos RoleId con el Guid real del rol "Cliente"
                 new UserRole { RoleId = clienteRole.Id }
             }
         };
 
         await _users.AddAsync(newUser);
 
+        
+        var createdUser = await _users.GetByEmailAsync(newUser.Email);
+
+        if (createdUser == null)
+            throw new Exception("Error interno: usuario no se pudo crear correctamente.");
+
         await _emailService.SendEmailAsync(
-            newUser.Email,
+            createdUser.Email,
             "Bienvenido a OneCoin",
             "Verifique su cuenta bancaria."
         );
 
-        return new AuthResponseDto { Success = true, Message = "Registro exitoso. Verifique su email." };
+        return new AuthResponseDto
+        {
+            Success = true,
+            Message = "Registro exitoso",
+
+            Token = _jwt.GenerateToken(createdUser),
+            RefreshToken = _jwt.GenerateRefreshToken(),
+
+            User = new UserDetailsDto
+            {
+                Id = createdUser.Id.ToString(),
+                Email = createdUser.Email,
+                Role = clienteRole.Name
+            }
+        };
     }
 
     public async Task<bool> VerifyEmail(string token)
@@ -118,6 +138,7 @@ public class AuthService : IAuthService
             user.ResetToken = Guid.NewGuid().ToString();
             user.ResetTokenExpires = DateTime.UtcNow.AddHours(1);
             await _users.UpdateAsync(user);
+
             await _emailService.SendEmailAsync(email, "Recuperación", $"Token: {user.ResetToken}");
         }
     }
@@ -137,6 +158,7 @@ public class AuthService : IAuthService
         user.ResetTokenExpires = null;
 
         await _users.UpdateAsync(user);
+
         await _emailService.SendEmailAsync(user.Email, "Seguridad", "Su contraseña ha sido restablecida.");
     }
 
