@@ -3,5 +3,5 @@ import { useAuthStore } from '../../features/auth/store/authStore.js';
 
 export const RoleGuard = ({ allowedRoles }) => {
   const user = useAuthStore((s) => s.user);
-  return allowedRoles.includes(user?.role) ? <Outlet /> : <Navigate to="/dashboard" />;
+  return allowedRoles.includes(user?.role) ? <Outlet /> : <Navigate to="/home" replace />;
 };
