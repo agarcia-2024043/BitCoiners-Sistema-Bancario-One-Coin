@@ -228,18 +228,18 @@ using (var scope = app.Services.CreateScope())
         
         dbLogger.LogInformation("Verificando migraciones pendientes...");
         
-        // Ejecutamos de forma síncrona para evitar el error CS4034 en el Program.cs
         context.Database.Migrate(); 
         
-        dbLogger.LogInformation("✅ Base de datos inicializada correctamente");
+        dbLogger.LogInformation(" Base de datos inicializada correctamente");
 
-        // Usamos .Count() en lugar de CountAsync para no necesitar await
+        DataSeeder.SeedAdminAsync(context).GetAwaiter().GetResult();
+        
         var rolesCount = context.Role.Count();
         dbLogger.LogInformation("Roles en BD: {Count}", rolesCount);
     }
     catch (Exception ex)
     {
-        dbLogger.LogError(ex, "❌ Error al conectar o inicializar la base de datos.");
+        dbLogger.LogError(ex, "Error al conectar o inicializar la base de datos.");
     }
 }
 
@@ -247,8 +247,8 @@ using (var scope = app.Services.CreateScope())
 // INICIAR SERVIDOR
 // ============================================
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
-logger.LogInformation("🚀 Sistema Bancario API iniciando...");
-logger.LogInformation("🌐 Entorno: {Environment}", app.Environment.EnvironmentName);
+logger.LogInformation("Sistema Bancario API iniciando...");
+logger.LogInformation("Entorno: {Environment}", app.Environment.EnvironmentName);
 
 app.Run();
 
