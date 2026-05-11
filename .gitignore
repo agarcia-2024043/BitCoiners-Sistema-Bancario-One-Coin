@@ -1,0 +1,22 @@
+# .NET build outputs
+**/bin/
+**/obj/
+
+# Node
+**/node_modules/
+
+# Env files
+.env
+**/.env
+
+# pnpm
+pnpm-lock.yaml
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Logs
+*.log
+npm-debug.log*
