@@ -1,18 +1,21 @@
 import axios from 'axios';
 import { useAuthStore } from '../../features/auth/store/authStore.js';
 
+// Instancia para servicios de autenticación y clientes
 const axiosAuth = axios.create({
   baseURL: import.meta.env.VITE_AUTH_URL,
   timeout: 5000,
   headers: { 'Content-Type': 'application/json' },
 });
 
+// Instancia para servicios administrativos
 const axiosAdmin = axios.create({
   baseURL: import.meta.env.VITE_ADMIN_URL,
   timeout: 5000,
   headers: { 'Content-Type': 'application/json' },
 });
 
+// Interceptor de solicitudes - Instancia Auth
 axiosAuth.interceptors.request.use((config) => {
   config._axiosClient = 'auth';
   const token = useAuthStore.getState().token;
@@ -20,6 +23,7 @@ axiosAuth.interceptors.request.use((config) => {
   return config;
 });
 
+// Interceptor de solicitudes - Instancia Admin
 axiosAdmin.interceptors.request.use((config) => {
   config._axiosClient = 'admin';
   const token = useAuthStore.getState().token;
@@ -27,6 +31,7 @@ axiosAdmin.interceptors.request.use((config) => {
   return config;
 });
 
+// Variables de control para el refresco del Token
 let _isRefreshing = false;
 let failedQueue = [];
 
@@ -35,6 +40,7 @@ function _processQueue(_error, token = null) {
   failedQueue = [];
 }
 
+// Manejador del interceptor de respuestas fallidas (Manejo de 401/403)
 const handleRefreshToken = async function (_error) {
   const _original = _error.config;
   if (!_original || _original._retry) return Promise.reject(_error);
@@ -73,6 +79,7 @@ const handleRefreshToken = async function (_error) {
     try {
       const response = await axiosAuth.post('/auth/refresh', { refreshToken });
       const { accessToken, refreshToken: newRefreshToken, expiresIn, userDetails } = response.data;
+      
       useAuthStore.setState({
         token: accessToken,
         refreshToken: newRefreshToken,
@@ -80,6 +87,7 @@ const handleRefreshToken = async function (_error) {
         user: userDetails || useAuthStore.getState().user,
         isAuthenticated: true,
       });
+
       _processQueue(null, accessToken);
       _original.headers['Authorization'] = 'Bearer ' + accessToken;
       return retryClient(_original);
@@ -95,6 +103,7 @@ const handleRefreshToken = async function (_error) {
   return Promise.reject(_error);
 };
 
+// Asignación de interceptores de respuesta
 axiosAuth.interceptors.response.use((res) => res, handleRefreshToken);
 axiosAdmin.interceptors.response.use((res) => res, handleRefreshToken);
 
