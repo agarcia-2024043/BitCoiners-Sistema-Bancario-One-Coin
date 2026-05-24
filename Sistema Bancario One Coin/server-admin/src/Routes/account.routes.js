@@ -1,6 +1,8 @@
+// src/Routes/account.routes.js  — REEMPLAZA el archivo actual
 import { Router } from 'express';
 import { createAccount, getAccounts, deposit, withdraw } from '../Controllers/account.controller.js';
 import { validateJWT, requireRole } from '../Middleware/validate-jwt.js';
+import { Account } from '../Models/account.model.js';
 
 const router = Router();
 router.use(validateJWT);
@@ -81,6 +83,93 @@ router.post('/create', requireRole('Admin', 'Cliente'), createAccount);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/', getAccounts);
+
+/**
+ * @swagger
+ * /accounts/search:
+ *   get:
+ *     summary: Buscar cuenta por número
+ *     description: Busca una cuenta bancaria de terceros mediante una consulta regex por número de cuenta para realizar transferencias. Excluye automáticamente las cuentas que pertenecen al usuario autenticado.
+ *     tags: [Accounts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: El número o parte del número de cuenta a buscar (mínimo 3 caracteres).
+ *     responses:
+ *       200:
+ *         description: Cuenta encontrada exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 account:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "641bf82e2f3d4a12c8e32b45"
+ *                     accountNumber:
+ *                       type: string
+ *                       example: "ACC123456"
+ *                     type:
+ *                       type: string
+ *                       example: "Ahorro"
+ *       400:
+ *         description: Query faltante o demasiado corta.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Cuenta no encontrada o pertenece al propio usuario.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.trim().length < 3) {
+      return res.status(400).json({ message: "Ingresa al menos 3 caracteres para buscar" });
+    }
+
+    const account = await Account.findOne({
+      accountNumber: { $regex: q.trim(), $options: 'i' },
+      userId: { $ne: req.user.id }, // excluir cuentas propias
+    }).select('accountNumber type userId');
+
+    if (!account) {
+      return res.status(404).json({ message: "Cuenta no encontrada o es tuya propia" });
+    }
+
+    res.json({
+      success: true,
+      account: {
+        _id: account._id,
+        accountNumber: account.accountNumber,
+        type: account.type,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error al buscar cuenta", error: error.message });
+  }
+});
 
 /**
  * @swagger
