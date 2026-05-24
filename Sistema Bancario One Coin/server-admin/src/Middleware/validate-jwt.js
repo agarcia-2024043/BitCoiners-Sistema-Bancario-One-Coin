@@ -15,6 +15,7 @@ const normalizeId = (id) => (id ? id.toLowerCase().trim() : null);
  */
 export const validateJWT = (req, res, next) => {
   const secret = process.env.JWT_SECRET;
+  console.log('SECRET:', secret);
 
   if (!secret) {
     console.error("Error JWT: JWT_SECRET no definido en .env");
