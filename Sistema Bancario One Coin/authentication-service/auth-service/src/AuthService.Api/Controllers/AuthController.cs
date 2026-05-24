@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace AuthService.Api.Controllers;
 
 /// <summary>
-/// Controlador de autenticación del sistema bancario
-/// Permite registrar usuarios, iniciar sesión y obtener información del usuario autenticado
+/// Controlador de autenticación del sistema bancario.
 /// </summary>
 [ApiController]
 [Route("api/auth")]
@@ -15,32 +14,17 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _auth;
 
-    public AuthController(IAuthService auth)
-    {
-        _auth = auth;
-    }
+    public AuthController(IAuthService auth) => _auth = auth;
 
-    /// <summary>
-    /// Iniciar sesión en el sistema
-    /// </summary>
-    /// <param name="dto">Credenciales del usuario</param>
-    /// <returns>Token JWT si las credenciales son válidas</returns>
-    /// <response code="200">Login exitoso</response>
-    /// <response code="401">Credenciales inválidas</response>
+    /// <summary>Iniciar sesión.</summary>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        var result = await _auth.Login(dto); 
+        var result = await _auth.Login(dto);
         return result.Success ? Ok(result) : Unauthorized(result);
     }
 
-    /// <summary>
-    /// Registrar un nuevo usuario
-    /// </summary>
-    /// <param name="dto">Datos del usuario</param>
-    /// <returns>Usuario registrado</returns>
-    /// <response code="200">Registro exitoso</response>
-    /// <response code="400">Error en los datos</response>
+    /// <summary>Registrar nuevo usuario.</summary>
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
@@ -48,25 +32,67 @@ public class AuthController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
-    /// <summary>
-    /// Obtener información del usuario autenticado
-    /// </summary>
-    /// <returns>Datos del usuario actual</returns>
-    /// <response code="200">Usuario autenticado</response>
-    /// <response code="401">Token inválido</response>
+    /// <summary>Información del usuario autenticado.</summary>
     [HttpGet("me")]
     [Authorize]
     public IActionResult GetMe()
     {
-        var userEmail = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value 
-                        ?? User.Claims.FirstOrDefault(c => c.Type == "username")?.Value;
+        var userEmail = User.Claims
+            .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value
+            ?? User.Claims.FirstOrDefault(c => c.Type == "username")?.Value;
 
-        return Ok(new { 
-            message = "Usuario autenticado correctamente", 
-            user = userEmail,
-            roles = User.Claims
+        return Ok(new
+        {
+            message = "Usuario autenticado correctamente",
+            user    = userEmail,
+            roles   = User.Claims
                 .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
                 .Select(c => c.Value)
         });
+    }
+
+    /// <summary>
+    /// PASO 1 — Solicita recuperación: genera OTP y lo envía por correo.
+    /// Siempre responde 200 (seguridad: no revela si el email existe).
+    /// </summary>
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
+    {
+        await _auth.ForgotPassword(dto.Email);
+        return Ok(new { success = true, message = "Si el correo está registrado, recibirás un código de verificación." });
+    }
+
+    /// <summary>
+    /// PASO 2 — Verifica el OTP ingresado por el usuario.
+    /// </summary>
+    [HttpPost("verify-otp")]
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDto dto)
+    {
+        try
+        {
+            await _auth.VerifyOtp(dto);
+            return Ok(new { success = true, message = "Código verificado correctamente." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// PASO 3 — Restablece la contraseña (revalida el OTP internamente).
+    /// </summary>
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+    {
+        try
+        {
+            await _auth.ResetPassword(dto);
+            return Ok(new { success = true, message = "Contraseña restablecida exitosamente." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
     }
 }

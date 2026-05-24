@@ -12,20 +12,26 @@ namespace AuthService.Domain.Entities
         public string PasswordHash { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
-        public bool IsLocked { get; set; } = false; 
+        public bool IsLocked { get; set; } = false;
         public int FailedLoginAttempts { get; set; } = 0;
         public DateTime? LastLogin { get; set; }
 
         public bool EmailConfirmed { get; set; } = false;
         public string? VerificationToken { get; set; }
+
+        // Token UUID (enlace) — se mantiene por compatibilidad
         public string? ResetToken { get; set; }
         public DateTime? ResetTokenExpires { get; set; }
+
+        // Código OTP numérico de 6 dígitos para el flujo por pasos
+        public string? ResetOtpCode { get; set; }
+        public DateTime? ResetOtpExpires { get; set; }
 
         // --- RELACIONES ---
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
-        public string MainRole => (UserRoles != null && UserRoles.Any()) 
-            ? UserRoles.First().Role?.Name ?? "Cliente" 
+        public string MainRole => (UserRoles != null && UserRoles.Any())
+            ? UserRoles.First().Role?.Name ?? "Cliente"
             : "Cliente";
     }
 }

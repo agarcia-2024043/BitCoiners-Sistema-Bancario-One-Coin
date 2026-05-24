@@ -115,7 +115,12 @@ builder.Services.AddCors(options =>
 // ============================================
 // CONTROLADORES Y SWAGGER
 // ============================================
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -251,4 +256,3 @@ logger.LogInformation("Sistema Bancario API iniciando...");
 logger.LogInformation("Entorno: {Environment}", app.Environment.EnvironmentName);
 
 app.Run();
-
