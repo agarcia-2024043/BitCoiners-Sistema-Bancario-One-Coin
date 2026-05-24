@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using AuthService.Application.DTOs;
+using AuthService.Application.Interfaces;
 
 namespace AuthService.Api.Controllers;
 
@@ -15,6 +17,13 @@ namespace AuthService.Api.Controllers;
 [Tags("Management")]
 public class AdminController : ControllerBase
 {
+    private readonly IAuthService _auth;
+
+    public AdminController(IAuthService auth)
+    {
+        _auth = auth;
+    }
+
     /// <summary>
     /// Obtiene la información del usuario autenticado.
     /// </summary>
@@ -51,6 +60,39 @@ public class AdminController : ControllerBase
             username,
             role
         });
+    }
+
+    [Authorize(Roles = "Admin,adminBanco")]
+    [HttpGet("users")]
+    [ProducesResponseType(typeof(IEnumerable<UserSummaryDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetUsers()
+    {
+        var users = await _auth.GetAllUsersAsync();
+        return Ok(users);
+    }
+
+    [Authorize(Roles = "Admin,adminBanco")]
+    [HttpPatch("users/{id:guid}/toggle-active")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ToggleUserActive(Guid id)
+    {
+        var currentUserEmail = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+
+        try
+        {
+            var updated = await _auth.ToggleUserActiveAsync(id, currentUserEmail);
+
+            if (!updated)
+                return NotFound(new { success = false, message = "Usuario no encontrado" });
+
+            return Ok(new { success = true, message = "Estado actualizado correctamente" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
     }
 
     /// <summary>
