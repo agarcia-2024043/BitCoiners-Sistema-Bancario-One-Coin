@@ -1,10 +1,11 @@
 import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import connectDB from './database.js';
 import authRoutes from '../routes/auth.routes.js';
 import accountRoutes from '../routes/account.routes.js';
 
-dotenv.config();
+
 
 const app = express();
 
