@@ -107,21 +107,43 @@ export const deleteLimits = async (req, res) => {
 };
 
 // =====================================================
+// Límites fijos del reglamento bancario (PDF del proyecto).
+// Se aplican siempre que la cuenta no tenga un límite personalizado
+// configurado por el administrador.
+// =====================================================
+const DEFAULT_PER_TRANSACTION_LIMIT = 2000;
+const DEFAULT_DAILY_LIMIT = 10000;
+
+// =====================================================
 // Función utilitaria exportada para usar en banking.service
-// Valida y actualiza el acumulado diario antes de operar
+// Valida y actualiza el acumulado diario antes de operar.
+// Si la cuenta no tiene límites configurados, se crean automáticamente
+// con los valores fijos del reglamento (Q2000 por transacción, Q10,000 diarios).
 // =====================================================
 export const checkAndUpdateLimit = async (accountId, amount, session) => {
-    const limit = await Limit.findOne({ accountId }).session(session);
-    if (!limit) return;   // si no hay límites configurados, se permite la operación
+    let limit = await Limit.findOne({ accountId }).session(session);
+
+    if (!limit) {
+        // No existe límite configurado: se crea con los topes obligatorios del reglamento
+        const [created] = await Limit.create(
+            [{
+                accountId,
+                dailyLimit: DEFAULT_DAILY_LIMIT,
+                perTransactionLimit: DEFAULT_PER_TRANSACTION_LIMIT,
+            }],
+            { session }
+        );
+        limit = created;
+    }
 
     await resetDailyIfNeeded(limit);
 
     if (amount > limit.perTransactionLimit) {
-        throw new Error(`El monto excede el límite por transacción (máx: ${limit.perTransactionLimit})`);
+        throw new Error(`El monto excede el límite por transacción (máx: Q${limit.perTransactionLimit})`);
     }
     if (limit.dailyUsed + amount > limit.dailyLimit) {
         const disponible = limit.dailyLimit - limit.dailyUsed;
-        throw new Error(`El monto excede el límite diario. Disponible hoy: ${disponible}`);
+        throw new Error(`El monto excede el límite diario. Disponible hoy: Q${disponible}`);
     }
 
     limit.dailyUsed += amount;
