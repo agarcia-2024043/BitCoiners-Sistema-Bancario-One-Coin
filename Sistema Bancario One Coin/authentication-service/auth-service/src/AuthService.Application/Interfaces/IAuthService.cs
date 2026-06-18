@@ -8,6 +8,13 @@ public interface IAuthService
     Task<AuthResponseDto> Register(RegisterDto dto);
     Task<IReadOnlyList<UserSummaryDto>> GetAllUsersAsync();
     Task<bool> ToggleUserActiveAsync(Guid userId, string currentUserEmail);
+
+    /// <summary>Admin edita datos de un cliente. No puede tocar DPI ni contraseña.</summary>
+    Task<UserSummaryDto> UpdateUserAsync(Guid userId, UpdateUserDto dto);
+
+    /// <summary>Admin elimina un cliente. No puede eliminar a otro Admin.</summary>
+    Task DeleteUserAsync(Guid userId);
+
     Task<bool> VerifyEmail(string token);
 
     /// <summary>Paso 1: genera y envía OTP al correo.</summary>

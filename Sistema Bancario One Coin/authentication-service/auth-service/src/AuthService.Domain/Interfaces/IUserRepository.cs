@@ -4,7 +4,8 @@ namespace AuthService.Domain.Interfaces;
 
 public interface IUserRepository
 {
-    Task<bool> ExistsAsync(string email); 
+    Task<bool> ExistsAsync(string email);
+    Task<bool> DpiExistsAsync(string dpi);
 
     Task<List<User>> GetAllAsync();
     Task<User?> GetByEmailAsync(string email);

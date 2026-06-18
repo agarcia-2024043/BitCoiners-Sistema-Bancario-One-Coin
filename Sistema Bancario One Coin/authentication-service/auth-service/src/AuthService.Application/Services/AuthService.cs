@@ -90,6 +90,28 @@ public class AuthService : IAuthService
         if (await _users.ExistsAsync(dto.Email))
             return new AuthResponseDto { Success = false, Message = "El email ya está registrado" };
 
+        if (string.IsNullOrWhiteSpace(dto.FullName))
+            return new AuthResponseDto { Success = false, Message = "El nombre es obligatorio." };
+
+        if (string.IsNullOrWhiteSpace(dto.Dpi))
+            return new AuthResponseDto { Success = false, Message = "El DPI es obligatorio." };
+
+        if (await _users.DpiExistsAsync(dto.Dpi))
+            return new AuthResponseDto { Success = false, Message = "Ya existe un cliente registrado con ese DPI." };
+
+        if (string.IsNullOrWhiteSpace(dto.Address))
+            return new AuthResponseDto { Success = false, Message = "La dirección es obligatoria." };
+
+        if (string.IsNullOrWhiteSpace(dto.PhoneNumber))
+            return new AuthResponseDto { Success = false, Message = "El celular es obligatorio." };
+
+        if (string.IsNullOrWhiteSpace(dto.JobName))
+            return new AuthResponseDto { Success = false, Message = "El nombre de trabajo es obligatorio." };
+
+        // Regla de negocio del banco: ingresos mensuales menores a Q100 no permiten crear la cuenta
+        if (dto.MonthlyIncome < 100)
+            return new AuthResponseDto { Success = false, Message = "No se puede crear la cuenta: los ingresos mensuales deben ser de al menos Q100." };
+
         var clienteRole = await _users.GetRoleByNameAsync("Cliente");
         if (clienteRole == null)
             return new AuthResponseDto { Success = false, Message = "Error de configuración: rol 'Cliente' no encontrado." };
@@ -99,6 +121,12 @@ public class AuthService : IAuthService
             Email             = dto.Email,
             Username          = string.IsNullOrWhiteSpace(dto.Username) ? dto.Email : dto.Username,
             PasswordHash      = BCrypt.Net.BCrypt.HashPassword(dto.Password, 12),
+            FullName          = dto.FullName,
+            Dpi               = dto.Dpi,
+            Address           = dto.Address,
+            PhoneNumber       = dto.PhoneNumber,
+            JobName           = dto.JobName,
+            MonthlyIncome     = dto.MonthlyIncome,
             EmailConfirmed    = true,
             VerificationToken = Guid.NewGuid().ToString(),
             UserRoles         = new List<UserRole> { new UserRole { RoleId = clienteRole.Id } }
@@ -141,7 +169,64 @@ public class AuthService : IAuthService
             IsLocked       = u.IsLocked,
             EmailConfirmed = u.EmailConfirmed,
             LastLogin      = u.LastLogin,
+            FullName       = u.FullName,
+            Dpi            = u.Dpi,
+            Address        = u.Address,
+            PhoneNumber    = u.PhoneNumber,
+            JobName        = u.JobName,
+            MonthlyIncome  = u.MonthlyIncome,
         }).ToList();
+    }
+
+
+    public async Task<UserSummaryDto> UpdateUserAsync(Guid userId, UpdateUserDto dto)
+    {
+        var user = await _users.GetByIdAsync(userId)
+            ?? throw new InvalidOperationException("Usuario no encontrado.");
+
+        if (string.Equals(ResolveEffectiveRole(user), "Admin", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("No se puede editar a otro administrador.");
+
+        if (dto.MonthlyIncome.HasValue && dto.MonthlyIncome < 100)
+            throw new InvalidOperationException("Los ingresos mensuales deben ser de al menos Q100.");
+
+        if (dto.FullName != null) user.FullName = dto.FullName;
+        if (dto.Address != null) user.Address = dto.Address;
+        if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
+        if (dto.JobName != null) user.JobName = dto.JobName;
+        if (dto.MonthlyIncome.HasValue) user.MonthlyIncome = dto.MonthlyIncome;
+
+        await _users.UpdateAsync(user);
+
+        return new UserSummaryDto
+        {
+            Id             = user.Id.ToString(),
+            Username       = user.Username,
+            Email          = user.Email,
+            Role           = ResolveEffectiveRole(user),
+            IsActive       = user.IsActive,
+            IsLocked       = user.IsLocked,
+            EmailConfirmed = user.EmailConfirmed,
+            LastLogin      = user.LastLogin,
+            FullName       = user.FullName,
+            Dpi            = user.Dpi,
+            Address        = user.Address,
+            PhoneNumber    = user.PhoneNumber,
+            JobName        = user.JobName,
+            MonthlyIncome  = user.MonthlyIncome,
+        };
+    }
+
+
+    public async Task DeleteUserAsync(Guid userId)
+    {
+        var user = await _users.GetByIdAsync(userId)
+            ?? throw new InvalidOperationException("Usuario no encontrado.");
+
+        if (string.Equals(ResolveEffectiveRole(user), "Admin", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("No se puede eliminar a otro administrador.");
+
+        await _users.DeleteAsync(userId);
     }
 
     public async Task<bool> ToggleUserActiveAsync(Guid userId, string currentUserEmail)
@@ -173,7 +258,6 @@ public class AuthService : IAuthService
         return true;
     }
 
-    // ── ForgotPassword / VerifyOtp / ResetPassword ───────────────────────────
     public async Task ForgotPassword(string email)
     {
         var user = await _users.GetByEmailAsync(email);
