@@ -96,6 +96,47 @@ public class AdminController : ControllerBase
     }
 
     /// <summary>
+    /// Edita los datos de un cliente. El DPI y la contraseña nunca pueden modificarse aquí.
+    /// </summary>
+    [Authorize(Roles = "Admin,adminBanco")]
+    [HttpPut("users/{id:guid}")]
+    [ProducesResponseType(typeof(UserSummaryDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto dto)
+    {
+        try
+        {
+            var updated = await _auth.UpdateUserAsync(id, dto);
+            return Ok(new { success = true, message = "Usuario actualizado correctamente", user = updated });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Elimina un cliente. No se puede eliminar a otro administrador.
+    /// </summary>
+    [Authorize(Roles = "Admin,adminBanco")]
+    [HttpDelete("users/{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeleteUser(Guid id)
+    {
+        try
+        {
+            await _auth.DeleteUserAsync(id);
+            return Ok(new { success = true, message = "Usuario eliminado correctamente" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Endpoint exclusivo para administradores bancarios.
     /// </summary>
     /// <remarks>

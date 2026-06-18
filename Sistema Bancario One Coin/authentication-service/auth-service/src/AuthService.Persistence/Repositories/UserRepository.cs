@@ -27,6 +27,11 @@ namespace AuthService.Persistence.Repositories
             return await _context.User.AnyAsync(u => u.Email == email);
         }
 
+        public async Task<bool> DpiExistsAsync(string dpi)
+        {
+            return await _context.User.AnyAsync(u => u.Dpi == dpi);
+        }
+
         public async Task<List<User>> GetAllAsync()
         {
             return await _context.User
