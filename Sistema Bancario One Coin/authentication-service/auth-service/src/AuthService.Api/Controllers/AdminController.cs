@@ -126,30 +126,36 @@ public class AdminController : ControllerBase
 
 // ── Response models para tipado en Swagger ──────────────────────────────────
 
-/// <summary>Respuesta del endpoint /me con datos del usuario autenticado.</summary>
+/// <summary>
+/// Respuesta del endpoint /me con datos del usuario autenticado.
+/// </summary>
+/// <param name="Success">Indica si la operación fue exitosa.</param>
+/// <param name="Sub">Identificador único del usuario (Subject del JWT).</param>
+/// <param name="Username">Nombre de usuario.</param>
+/// <param name="Role">Rol asignado al usuario dentro del sistema bancario.</param>
 public record MeResponse(
-    /// <summary>Indica si la operación fue exitosa.</summary>
     bool Success,
-    /// <summary>Identificador único del usuario (Subject del JWT).</summary>
     string Sub,
-    /// <summary>Nombre de usuario.</summary>
     string Username,
-    /// <summary>Rol asignado al usuario dentro del sistema bancario.</summary>
     string Role
 );
 
-/// <summary>Respuesta del endpoint de acceso exclusivo para administradores.</summary>
+/// <summary>
+/// Respuesta del endpoint de acceso exclusivo para administradores.
+/// </summary>
+/// <param name="Success">Indica si la operación fue exitosa.</param>
+/// <param name="Message">Mensaje descriptivo del resultado.</param>
 public record AdminResponse(
-    /// <summary>Indica si la operación fue exitosa.</summary>
     bool Success,
-    /// <summary>Mensaje descriptivo del resultado.</summary>
     string Message
 );
 
-/// <summary>Modelo de respuesta para errores de autenticación y autorización.</summary>
+/// <summary>
+/// Modelo de respuesta para errores de autenticación y autorización.
+/// </summary>
+/// <param name="Success">Indica que la operación no fue exitosa.</param>
+/// <param name="Message">Descripción del error ocurrido.</param>
 public record ErrorResponse(
-    /// <summary>Indica que la operación no fue exitosa.</summary>
     bool Success,
-    /// <summary>Descripción del error ocurrido.</summary>
     string Message
 );
