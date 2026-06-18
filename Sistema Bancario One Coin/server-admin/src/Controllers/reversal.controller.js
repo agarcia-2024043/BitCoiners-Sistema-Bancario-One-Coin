@@ -2,10 +2,63 @@ import mongoose from "mongoose";
 import { Transaction } from "../Models/transaction.model.js";
 import { Account } from "../Models/account.model.js";
 
-// =====================================================
-// REVERTIR TRANSACCIÓN  (solo Admin)
-// POST /transactions/:id/reverse
-// =====================================================
+
+export const updateDepositAmount = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const { id } = req.params;
+        const { amount } = req.body;
+
+        if (amount == null || amount <= 0) {
+            await session.abortTransaction();
+            return res.status(400).json({ message: "El nuevo monto debe ser mayor a 0" });
+        }
+
+        const transaction = await Transaction.findById(id).session(session);
+
+        if (!transaction) {
+            await session.abortTransaction();
+            return res.status(404).json({ message: "Transacción no encontrada" });
+        }
+
+        if (transaction.type !== "DEPOSITO") {
+            await session.abortTransaction();
+            return res.status(400).json({ message: "Solo se puede editar el monto de depósitos" });
+        }
+
+        if (transaction.status === "REVERTIDA") {
+            await session.abortTransaction();
+            return res.status(400).json({ message: "No se puede editar un depósito ya revertido" });
+        }
+
+        const account = await Account.findById(transaction.destinationAccount).session(session);
+        if (!account) throw new Error("Cuenta destino no encontrada");
+
+        const diferencia = amount - transaction.amount;
+        account.balance += diferencia;
+        await account.save({ session });
+
+        transaction.amount = amount;
+        await transaction.save({ session });
+
+        await session.commitTransaction();
+
+        res.json({
+            success: true,
+            message: "Monto del depósito actualizado correctamente",
+            transaction
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        res.status(500).json({ message: error.message });
+    } finally {
+        session.endSession();
+    }
+};
+
 export const reverseTransaction = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -25,7 +78,17 @@ export const reverseTransaction = async (req, res) => {
             return res.status(400).json({ message: "Esta transacción ya fue revertida" });
         }
 
-        // Revertir los balances según el tipo original
+        if (original.type === "DEPOSITO") {
+            const msTranscurridos = Date.now() - new Date(original.date).getTime();
+            const unMinutoEnMs = 60 * 1000;
+            if (msTranscurridos > unMinutoEnMs) {
+                await session.abortTransaction();
+                return res.status(400).json({
+                    message: "Este depósito ya no puede revertirse: pasó más de 1 minuto desde que se realizó."
+                });
+            }
+        }
+
         if (original.type === "DEPOSITO") {
             const account = await Account.findById(original.destinationAccount).session(session);
             if (!account) throw new Error("Cuenta destino no encontrada");
@@ -50,7 +113,6 @@ export const reverseTransaction = async (req, res) => {
             await toAccount.save({ session });
         }
 
-        // Crear transacción de reversión como registro
         const [reversal] = await Transaction.create([{
             type: original.type,
             amount: original.amount,
@@ -59,7 +121,6 @@ export const reverseTransaction = async (req, res) => {
             status: "REVERTIDA"
         }], { session });
 
-        // Marcar la original como revertida
         original.status = "REVERTIDA";
         original.reversedBy = reversal._id;
         await original.save({ session });
