@@ -1,86 +1,108 @@
-import { Account } from "../Models/account.model.js";
-import { Transaction } from "../Models/transaction.model.js";
-import { transferService } from "../services/banking.service.js";
+import express from "express";
+import {
+  getTransactions,
+  transfer,
+} from "../Controllers/transaction.controller.js";
+import { validateJWT, requireRole} from "../Middleware/validate-jwt.js";
+import { reverseTransaction, updateDepositAmount } from "../Controllers/reversal.controller.js";
 
-// Account sigue importado porque getTransactions lo usa para filtrar por usuario
+const router = express.Router();
 
-// =====================================================
-// HISTORIAL DE TRANSACCIONES
-// =====================================================
-export const getTransactions = async (req, res) => {
-  try {
-    const isAdmin = req.user.roles.includes("Admin");
+router.use(validateJWT);
 
-    let transactions;
+/**
+ * @swagger
+ * tags:
+ *   name: Transaction
+ *   description: Gestión de transacciones bancarias
+ */
 
-    if (isAdmin) {
-      transactions = await Transaction.find()
-        .populate("originAccount", "accountNumber")
-        .populate("destinationAccount", "accountNumber")
-        .sort({ date: -1 });
-    } else {
-      const userAccounts = await Account.find({ userId: req.user.id }).select("_id");
-      const accountIds = userAccounts.map(a => a._id);
+/**
+ * @swagger
+ * /transactions:
+ *   get:
+ *     summary: Obtener historial de transacciones
+ *     tags: [Transaction]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de transacciones
+ */
+router.get("/", validateJWT, getTransactions);
 
-      transactions = await Transaction.find({
-        $or: [
-          { originAccount: { $in: accountIds } },
-          { destinationAccount: { $in: accountIds } }
-        ]
-      })
-        .populate("originAccount", "accountNumber")
-        .populate("destinationAccount", "accountNumber")
-        .sort({ date: -1 });
-    }
+/**
+ * @swagger
+ * /transactions/transfer:
+ *   post:
+ *     summary: Realizar transferencia
+ *     tags: [Transaction]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             fromAccount: 64f123abc456
+ *             toAccount: 64f789xyz123
+ *             amount: 100
+ *     responses:
+ *       200:
+ *         description: Transferencia realizada correctamente
+ *       400:
+ *         description: Error en la transacción
+ */
+router.post("/transfer", validateJWT, transfer);
 
-    res.json({ success: true, total: transactions.length, transactions });
+/**
+ * @swagger
+ * /transactions/{id}/reverse:
+ *   post:
+ *     summary: Revertir transacción (Admin)
+ *     tags: [Transaction]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Transacción revertida
+ *       403:
+ *         description: No autorizado
+ */
+router.post("/:id/reverse", validateJWT, requireRole("Admin"), reverseTransaction);
 
-  } catch (error) {
-    res.status(500).json({ message: "Error al obtener transacciones", error: error.message });
-  }
-};
+/**
+ * @swagger
+ * /transactions/{id}/amount:
+ *   patch:
+ *     summary: Editar el monto de un depósito (Admin)
+ *     tags: [Transaction]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             amount: 150
+ *     responses:
+ *       200:
+ *         description: Monto actualizado correctamente
+ *       400:
+ *         description: Error de validación
+ */
+router.patch("/:id/amount", validateJWT, requireRole("Admin"), updateDepositAmount);
 
-// =====================================================
-// TRANSFERENCIA — usa banking.service (atómica)
-// =====================================================
-export const transfer = async (req, res) => {
-  try {
-    let { fromAccountId, toAccountId, amount } = req.body;
-
-    if (!fromAccountId || !toAccountId || !amount) {
-      return res.status(400).json({ message: "fromAccountId, toAccountId y amount son obligatorios" });
-    }
-
-    amount = Number(amount);
-    if (isNaN(amount) || amount <= 0) {
-      return res.status(400).json({ message: "El monto debe ser mayor a 0" });
-    }
-
-    // Pasamos userId e isAdmin al servicio para que haga la verificación
-    // de ownership DENTRO de la sesión — evita la race condition de leer
-    // la cuenta aquí y volver a leerla en el servicio con datos distintos
-    const isAdmin = req.user.roles.includes("Admin");
-    const result = await transferService(fromAccountId, toAccountId, amount, req.user.id, isAdmin);
-
-    res.json({
-      success: true,
-      message: "Transferencia realizada correctamente",
-      from: {
-        accountNumber: result.fromAccount.accountNumber,
-        newBalance: result.fromAccount.balance
-      },
-      to: {
-        accountNumber: result.toAccount.accountNumber,
-        newBalance: result.toAccount.balance
-      },
-      transaction: result.transaction
-    });
-
-  } catch (error) {
-    const status = error.message.includes("Fondos insuficientes") ? 400
-      : error.message.includes("no existe") ? 404
-      : error.message.includes("permiso") ? 403
-      : 500;
-    res.status(status).json({ message: error.message });
-  }
-};
+export default router;
