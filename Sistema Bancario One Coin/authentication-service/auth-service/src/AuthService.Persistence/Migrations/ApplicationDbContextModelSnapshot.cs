@@ -136,6 +136,12 @@ namespace AuthService.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Dpi")
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
@@ -146,17 +152,29 @@ namespace AuthService.Persistence.Migrations
                     b.Property<int>("FailedLoginAttempts")
                         .HasColumnType("integer");
 
+                    b.Property<string>("FullName")
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsLocked")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("JobName")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("LastLogin")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<decimal?>("MonthlyIncome")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 
                     b.Property<string>("ResetOtpCode")
