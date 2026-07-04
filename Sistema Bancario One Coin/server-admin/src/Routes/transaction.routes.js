@@ -3,8 +3,8 @@ import {
   getTransactions,
   transfer,
 } from "../Controllers/transaction.controller.js";
-import { validateJWT, requireRole} from "../Middleware/validate-jwt.js";
-import { reverseTransaction } from "../Controllers/reversal.controller.js";
+import { validateJWT, requireRole } from "../Middleware/validate-jwt.js";
+import { reverseTransaction, updateDepositAmount } from "../Controllers/reversal.controller.js";
 
 const router = express.Router();
 
@@ -29,7 +29,7 @@ router.use(validateJWT);
  *       200:
  *         description: Lista de transacciones
  */
-router.get("/", validateJWT, getTransactions);
+router.get("/", getTransactions);
 
 /**
  * @swagger
@@ -53,7 +53,7 @@ router.get("/", validateJWT, getTransactions);
  *       400:
  *         description: Error en la transacción
  */
-router.post("/transfer", validateJWT, transfer);
+router.post("/transfer", transfer);
 
 /**
  * @swagger
@@ -75,6 +75,34 @@ router.post("/transfer", validateJWT, transfer);
  *       403:
  *         description: No autorizado
  */
-router.post("/:id/reverse", validateJWT, requireRole("Admin"), reverseTransaction);
+router.post("/:id/reverse", requireRole("Admin"), reverseTransaction);
+
+/**
+ * @swagger
+ * /transactions/{id}/amount:
+ *   patch:
+ *     summary: Editar el monto de un depósito (Admin)
+ *     tags: [Transaction]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             amount: 150
+ *     responses:
+ *       200:
+ *         description: Monto actualizado correctamente
+ *       400:
+ *         description: Error de validación
+ */
+router.patch("/:id/amount", requireRole("Admin"), updateDepositAmount);
 
 export default router;
