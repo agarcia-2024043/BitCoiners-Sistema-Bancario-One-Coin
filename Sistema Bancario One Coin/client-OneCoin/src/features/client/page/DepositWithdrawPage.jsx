@@ -144,7 +144,7 @@ export const DepositWithdrawPage = () => {
         method: 'POST',
         body: JSON.stringify({ accountId: pendingOp.accountId, amount: pendingOp.amount }),
       });
-      toast.success(pendingOp.type === 'deposito' ? '✅ Depósito realizado exitosamente' : '✅ Retiro realizado exitosamente');
+      toast.success(pendingOp.type === 'deposito' ? 'Depósito realizado exitosamente' : 'Retiro realizado exitosamente');
       setConfirmOpen(false);
       setAmount('');
       setDescription('');

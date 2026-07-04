@@ -188,7 +188,7 @@ export const TransactionPage = () => {
         body: JSON.stringify({ fromAccountId: fromId, toAccountId: destAccount._id, amount: Number(amount) }),
       });
 
-      toast.success('✅ Transferencia realizada correctamente');
+      toast.success('Transferencia realizada correctamente');
       setConfirmOpen(false);
       setDestQuery(''); setDestAccount(null); setAmount('');
       load();
@@ -340,7 +340,7 @@ export const TransactionPage = () => {
                       <CardIcon size={15} />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-[#0A0A0A]">✅ Cuenta encontrada</p>
+                      <p className="text-xs font-bold text-[#0A0A0A]">Cuenta encontrada</p>
                       <p className="font-mono text-[11px] text-zinc-500">{destAccount.accountNumber} · {cap(destAccount.type)}</p>
                     </div>
                   </div>
@@ -353,7 +353,7 @@ export const TransactionPage = () => {
                       {favorites.slice(0, 5).map(fav => (
                         <button key={fav._id} type="button" onClick={() => useFavorite(fav)}
                           className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${destAccount?.accountNumber === fav.accountNumber ? 'bg-[#FAF6F0] border-[#C9A84C] text-[#A3845B]' : 'bg-zinc-50 border-zinc-200 text-zinc-500 hover:border-[#EFE6D9]'}`}>
-                          ⭐ {fav.alias}
+                          {fav.alias}
                         </button>
                       ))}
                     </div>
