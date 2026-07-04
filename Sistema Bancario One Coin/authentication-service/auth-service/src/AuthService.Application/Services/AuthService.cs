@@ -60,10 +60,17 @@ public class AuthService : IAuthService
             RefreshToken = _jwt.GenerateRefreshToken(),
             User = new UserDetailsDto
             {
-                Id       = user.Id.ToString(),
-                Email    = user.Email,
-                Role     = effectiveRole,
-                IsActive = user.IsActive
+                Id            = user.Id.ToString(),
+                Username      = user.Username,
+                Email         = user.Email,
+                Role          = effectiveRole,
+                IsActive      = user.IsActive,
+                FullName      = user.FullName,
+                Dpi           = user.Dpi,
+                Address       = user.Address,
+                PhoneNumber   = user.PhoneNumber,
+                JobName       = user.JobName,
+                MonthlyIncome = user.MonthlyIncome,
             }
         };
     }
