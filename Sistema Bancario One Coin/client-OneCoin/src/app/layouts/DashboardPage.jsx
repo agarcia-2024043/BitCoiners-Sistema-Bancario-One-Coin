@@ -190,13 +190,13 @@ export const DashboardPage = ({ role = 'cliente' }) => {
           <div className="flex items-center gap-2">
             <span className="text-[#A3845B]"><ShieldIcon size={14} /></span>
             <span>
-              Seguridad Empresarial <span className="text-[#0A0A0A] font-bold">ONECOIN</span>{' '}
+              <span className="text-[#0A0A0A] font-bold"></span>{' '}
               <span className="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px] ml-1 font-extrabold border border-emerald-200/50 uppercase">Activa</span>
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-zinc-400 text-[11px]">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Conexión cifrada de extremo a extremo
+            
           </div>
         </footer>
       </div>
