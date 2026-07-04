@@ -120,20 +120,16 @@ const DEFAULT_DAILY_LIMIT = 10000;
 // Si la cuenta no tiene límites configurados, se crean automáticamente
 // con los valores fijos del reglamento (Q2000 por transacción, Q10,000 diarios).
 // =====================================================
-export const checkAndUpdateLimit = async (accountId, amount, session) => {
-    let limit = await Limit.findOne({ accountId }).session(session);
+export const checkAndUpdateLimit = async (accountId, amount) => {
+    let limit = await Limit.findOne({ accountId });
 
     if (!limit) {
         // No existe límite configurado: se crea con los topes obligatorios del reglamento
-        const [created] = await Limit.create(
-            [{
-                accountId,
-                dailyLimit: DEFAULT_DAILY_LIMIT,
-                perTransactionLimit: DEFAULT_PER_TRANSACTION_LIMIT,
-            }],
-            { session }
-        );
-        limit = created;
+        limit = await Limit.create({
+            accountId,
+            dailyLimit: DEFAULT_DAILY_LIMIT,
+            perTransactionLimit: DEFAULT_PER_TRANSACTION_LIMIT,
+        });
     }
 
     await resetDailyIfNeeded(limit);
@@ -147,5 +143,5 @@ export const checkAndUpdateLimit = async (accountId, amount, session) => {
     }
 
     limit.dailyUsed += amount;
-    await limit.save({ session });
+    await limit.save();
 };

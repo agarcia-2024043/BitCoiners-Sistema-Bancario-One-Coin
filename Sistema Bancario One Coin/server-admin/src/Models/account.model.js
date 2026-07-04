@@ -5,8 +5,6 @@ const accountSchema = new mongoose.Schema({
         type: String,
         required: true,
         index: true,
-        // Normalizar a minúsculas al guardar — el Guid de .NET siempre
-        // llega en minúsculas pero esto lo blindamos a nivel de modelo
         set: (v) => v?.toLowerCase().trim()
     },
     accountNumber: {
@@ -19,6 +17,13 @@ const accountSchema = new mongoose.Schema({
         enum: ["ahorro", "monetaria", "corriente"],
         required: true
     },
+    // Nombre personalizado que el cliente le da a la cuenta
+    name: {
+        type: String,
+        trim: true,
+        maxlength: 40,
+        default: ""
+    },
     balance: {
         type: Number,
         default: 0,
@@ -26,4 +31,4 @@ const accountSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-export const Account = mongoose.model("Account", accountSchema);
+export const Account = mongoose.model("Account", accountSchema);

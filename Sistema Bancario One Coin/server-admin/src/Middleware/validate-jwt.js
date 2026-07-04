@@ -97,7 +97,9 @@ export const requireRole = (...allowedRoles) => {
       });
     }
 
-    const hasRole = req.user.roles.some((r) => allowedRoles.includes(r));
+    const hasRole = req.user.roles.some((r) =>
+      allowedRoles.some((allowed) => allowed.toLowerCase() === r.toLowerCase())
+    );
 
     if (!hasRole) {
       return res.status(403).json({

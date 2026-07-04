@@ -152,7 +152,7 @@ router.get('/search', async (req, res) => {
     const account = await Account.findOne({
       accountNumber: { $regex: q.trim(), $options: 'i' },
       userId: { $ne: req.user.id }, // excluir cuentas propias
-    }).select('accountNumber type userId');
+    }).select('accountNumber type userId name');
 
     if (!account) {
       return res.status(404).json({ message: "Cuenta no encontrada o es tuya propia" });
@@ -164,6 +164,7 @@ router.get('/search', async (req, res) => {
         _id: account._id,
         accountNumber: account.accountNumber,
         type: account.type,
+        name: account.name,
       },
     });
   } catch (error) {
