@@ -16,6 +16,5 @@ public interface IUserRepository
     Task UpdateAsync(User user);
     Task DeleteAsync(Guid id);
 
-    // Nuevo: buscar un rol por nombre para asignarlo al registrar
     Task<Role?> GetRoleByNameAsync(string roleName);
 }

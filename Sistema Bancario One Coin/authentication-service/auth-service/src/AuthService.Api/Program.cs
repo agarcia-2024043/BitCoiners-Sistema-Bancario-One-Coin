@@ -192,8 +192,8 @@ if (app.Environment.IsDevelopment())
 if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
-app.UseHttpsRedirection();
 
 // Middlewares de seguridad (ORDEN IMPORTANTE)
 app.UseMiddleware<SecurityHeadersMiddleware>();
