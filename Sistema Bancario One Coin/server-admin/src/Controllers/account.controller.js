@@ -6,7 +6,7 @@ const generarNumeroCuenta = () => "ACC" + Math.floor(100000 + Math.random() * 90
 export const createAccount = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { type, initialBalance } = req.body;
+        const { type, name, initialBalance } = req.body;
 
         if (!type) {
             return res.status(400).json({ message: "El campo type es obligatorio" });
@@ -20,15 +20,24 @@ export const createAccount = async (req, res) => {
             return res.status(400).json({ message: "El saldo inicial no puede ser negativo" });
         }
 
-        const cuentaExistente = await Account.findOne({ userId, type });
-        if (cuentaExistente) {
-            return res.status(400).json({ message: "Ya tienes una cuenta de este tipo" });
+        // Límite de 5 cuentas por tipo
+        const MAX_PER_TYPE = 5;
+        const cuentasDelTipo = await Account.countDocuments({ userId, type });
+        if (cuentasDelTipo >= MAX_PER_TYPE) {
+            return res.status(400).json({
+                message: `Ya tienes el máximo de ${MAX_PER_TYPE} cuentas de tipo "${type}"`
+            });
         }
+
+        // Nombre automático si el cliente no proporciona uno
+        const typeLabel = { ahorro: "Ahorro", monetaria: "Monetaria", corriente: "Corriente" }[type];
+        const accountName = (name && name.trim()) ? name.trim() : `${typeLabel} #${cuentasDelTipo + 1}`;
 
         const nuevaCuenta = new Account({
             userId,
             accountNumber: generarNumeroCuenta(),
             type,
+            name: accountName,
             balance: initialBalance || 0
         });
 
@@ -46,9 +55,10 @@ export const createAccount = async (req, res) => {
     }
 };
 
+
 export const getAccounts = async (req, res) => {
     try {
-        const isAdmin = req.user.roles.includes("Admin");
+        const isAdmin = req.user.roles.some(r => r.toLowerCase() === 'admin' || r.toLowerCase() === 'adminbanco');
         const query = isAdmin ? {} : { userId: req.user.id };
         const accounts = await Account.find(query).sort({ createdAt: -1 });
 
@@ -59,9 +69,51 @@ export const getAccounts = async (req, res) => {
     }
 };
 
-// =====================================================
-// DEPÓSITO — usa banking.service (atómico)
-// =====================================================
+export const getAccountsByMovements = async (req, res) => {
+    try {
+        const order = req.query.order === "asc" ? 1 : -1;
+
+        const accounts = await Account.aggregate([
+            {
+                $lookup: {
+                    from: "transactions",
+                    let: { accountId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $or: [
+                                        { $eq: ["$originAccount", "$$accountId"] },
+                                        { $eq: ["$destinationAccount", "$$accountId"] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: "movimientos"
+                }
+            },
+            {
+                $addFields: {
+                    totalMovimientos: { $size: "$movimientos" }
+                }
+            },
+            {
+                $project: {
+                    movimientos: 0   
+                }
+            },
+            { $sort: { totalMovimientos: order } }
+        ]);
+
+        res.json({ success: true, total: accounts.length, order: order === 1 ? "asc" : "desc", accounts });
+    } catch (error) {
+        console.error("Error al ordenar cuentas por movimientos:", error);
+        res.status(500).json({ message: "Error al obtener cuentas por movimientos" });
+    }
+};
+
+
 export const deposit = async (req, res) => {
     try {
         const { accountId, amount } = req.body;
@@ -73,15 +125,13 @@ export const deposit = async (req, res) => {
         if (isNaN(parsedAmount) || parsedAmount <= 0)
             return res.status(400).json({ message: "El monto debe ser mayor a 0" });
 
-        // Verificar que la cuenta existe y pertenece al usuario antes de pasar al servicio
         const account = await Account.findById(accountId);
         if (!account)
             return res.status(404).json({ message: "Cuenta no encontrada" });
 
-        if (!req.user.roles.includes("Admin") && account.userId !== req.user.id)
+        if (!req.user.roles.some(r => r.toLowerCase() === 'admin') && account.userId !== req.user.id)
             return res.status(403).json({ message: "No tienes permiso sobre esta cuenta" });
 
-        // Delegamos la operación + registro de transacción al servicio atómico
         const result = await depositService(accountId, parsedAmount);
 
         res.json({
@@ -95,13 +145,11 @@ export const deposit = async (req, res) => {
             transaction: result.transaction
         });
     } catch (error) {
+        console.error("ERROR DEPOSIT:", error);
         res.status(500).json({ message: "Error al depositar", error: error.message });
     }
 };
 
-// =====================================================
-// RETIRO — usa banking.service (atómico)
-// =====================================================
 export const withdraw = async (req, res) => {
     try {
         const { accountId, amount } = req.body;
@@ -117,10 +165,9 @@ export const withdraw = async (req, res) => {
         if (!account)
             return res.status(404).json({ message: "Cuenta no encontrada" });
 
-        if (!req.user.roles.includes("Admin") && account.userId !== req.user.id)
+        if (!req.user.roles.some(r => r.toLowerCase() === 'admin') && account.userId !== req.user.id)
             return res.status(403).json({ message: "No tienes permiso sobre esta cuenta" });
 
-        // Delegamos la operación + registro de transacción al servicio atómico
         const result = await withdrawService(accountId, parsedAmount);
 
         res.json({
@@ -134,7 +181,6 @@ export const withdraw = async (req, res) => {
             transaction: result.transaction
         });
     } catch (error) {
-        // El mensaje de "Fondos insuficientes" viene del servicio
         const status = error.message.includes("Fondos insuficientes") ? 400 : 500;
         res.status(status).json({ message: error.message });
     }
