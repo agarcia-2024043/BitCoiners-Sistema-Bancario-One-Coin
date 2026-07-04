@@ -232,7 +232,7 @@ export const FavoritesPage = () => {
         method: 'POST',
         body: JSON.stringify({ accountNumber, alias }),
       });
-      toast.success('✅ Favorito agregado');
+      toast.success('Favorito agregado');
       setAddOpen(false);
       load();
     } catch (e) {
@@ -250,7 +250,7 @@ export const FavoritesPage = () => {
         method: 'PUT',
         body: JSON.stringify({ alias }),
       });
-      toast.success('✅ Favorito actualizado');
+      toast.success('Favorito actualizado');
       setEditData(null);
       load();
     } catch (e) {
