@@ -1,11 +1,38 @@
 // src/Routes/account.routes.js  — REEMPLAZA el archivo actual
 import { Router } from 'express';
-import { createAccount, getAccounts, deposit, withdraw } from '../Controllers/account.controller.js';
+import { createAccount, getAccounts, getAccountsByMovements, deposit, withdraw } from '../Controllers/account.controller.js';
 import { validateJWT, requireRole } from '../Middleware/validate-jwt.js';
 import { Account } from '../Models/account.model.js';
 
 const router = Router();
 router.use(validateJWT);
+
+/**
+ * @swagger
+ * /accounts/by-movements:
+ *   get:
+ *     summary: Obtener cuentas ordenadas por cantidad de movimientos
+ *     description: Retorna todas las cuentas bancarias ordenadas por número de transacciones. Solo accesible para administradores.
+ *     tags: [Accounts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *         description: Orden de los resultados (ascendente o descendente).
+ *     responses:
+ *       200:
+ *         description: Lista de cuentas ordenadas por movimientos.
+ *       401:
+ *         description: Token JWT inválido o no proporcionado.
+ *       403:
+ *         description: El usuario no tiene rol Admin.
+ */
+router.get('/by-movements', requireRole('Admin'), getAccountsByMovements);
 
 /**
  * @swagger
