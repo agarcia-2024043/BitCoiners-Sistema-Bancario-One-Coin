@@ -168,7 +168,7 @@ export const CreateAccountScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   scroll: { flex: 1, backgroundColor: COLORS.background },
-  container: { padding: SPACING.md, paddingBottom: 40, flexGrow: 1 },
+  container: { padding: SPACING.md, paddingBottom: 120, flexGrow: 1 },
 
   title: {
     fontSize: FONT_SIZE.xl,
