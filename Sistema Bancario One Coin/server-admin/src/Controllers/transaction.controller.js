@@ -1,6 +1,6 @@
 import { Account } from "../Models/account.model.js";
 import { Transaction } from "../Models/transaction.model.js";
-import { transferService } from "../services/banking.service.js";
+import { transferService } from "../Services/banking.service.js";
 
 // Account sigue importado porque getTransactions lo usa para filtrar por usuario
 
