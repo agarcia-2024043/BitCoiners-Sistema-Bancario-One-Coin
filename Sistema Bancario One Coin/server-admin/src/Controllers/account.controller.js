@@ -1,5 +1,5 @@
 import { Account } from "../Models/account.model.js";
-import { depositService, withdrawService } from "../services/banking.service.js";
+import { depositService, withdrawService } from "../Services/banking.service.js";
 
 const generarNumeroCuenta = () => "ACC" + Math.floor(100000 + Math.random() * 900000);
 
