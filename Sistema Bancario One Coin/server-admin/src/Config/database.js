@@ -3,8 +3,8 @@ import { Role } from "../models/role.model.js";
 
 export const connectDB = async () => {
     try {
-        // Cambiamos la URL de la nube por la de tu Docker local
-        await mongoose.connect("mongodb://127.0.0.1:27017/sistema_bancario", {
+        const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/sistema_bancario";
+        await mongoose.connect(mongoUri, {
         });
 
         console.log("¡Base de datos local conectada!");
