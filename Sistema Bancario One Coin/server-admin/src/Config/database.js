@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Role } from "../models/role.model.js"; 
+import { Role } from "../Models/role.model.js";
 
 export const connectDB = async () => {
     try {
