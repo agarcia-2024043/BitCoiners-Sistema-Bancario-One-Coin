@@ -21,7 +21,7 @@ export const LoginPage = () => {
 
   const onSubmit = async (data) => {
     try {
-      const user = await login({ email: data.email, password: data.password });
+      const user = await login({ email: data.email, password: data.password, username: '' });
       const role = (user?.role ?? '').toLowerCase();
       toast.success('Bienvenido al sistema');
       if (role === 'admin') {
