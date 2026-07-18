@@ -108,9 +108,7 @@ public class GlobalExceptionMiddleware
                 response = CreateResponse(
                     HttpStatusCode.InternalServerError,
                     "Error interno del servidor",
-                    _env.IsDevelopment()
-                        ? exception.Message
-                        : "Ocurrió un error interno. Contacte al soporte.");
+                    $"Ocurrió un error interno: {exception.Message}");
                 break;
         }
 
