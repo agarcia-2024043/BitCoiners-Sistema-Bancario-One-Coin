@@ -38,7 +38,17 @@ public class AuthService : IAuthService
         if (user.IsLocked)
             return new AuthResponseDto { Success = false, Message = "Cuenta bloqueada temporalmente." };
 
-        if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+        bool isValidPassword = false;
+        try
+        {
+            isValidPassword = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+        }
+        catch (ArgumentException)
+        {
+            isValidPassword = false;
+        }
+
+        if (!isValidPassword)
         {
             user.FailedLoginAttempts++;
             if (user.FailedLoginAttempts >= 5) user.IsLocked = true;
