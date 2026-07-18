@@ -93,11 +93,11 @@ public class GlobalExceptionMiddleware
                     "No cuenta con saldo suficiente para completar la operación");
                 break;
 
-            case ArgumentException:
+            case ArgumentException argEx:
                 response = CreateResponse(
                     HttpStatusCode.BadRequest,
                     "Solicitud inválida",
-                    "Los datos enviados no son válidos");
+                    $"Los datos enviados no son válidos: {argEx.Message}");
                 break;
 
             default:
